@@ -1,0 +1,174 @@
+<h3>Course Management</h3>
+<hr>
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th>编号</th>
+		    <th>名称</th>
+		    <th>学分</th>
+		</tr>
+	</thead>
+	<tbody>
+		
+	</tbody>
+</table>
+<div class="opts">
+	<button class="btn btn-danger btn-sm">修改</button>
+	<button class="btn btn-danger btn-sm">添加</button>
+	<button class="btn btn-danger btn-sm">删除</button>
+</div>
+
+<div class="modal fade amendtable" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">修改课程信息</h4>
+      </div>
+      <div class="modal-body">
+        <form action="" class="studentForm amendform" method="POST">
+          <input type="hidden" name="id">
+          名称  <input type="text" name="name"><br>
+          学分  <input type="text" name="credit"><br>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary updBtn amendbutton">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="modal fade addtable" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">add课程信息</h4>
+      </div>
+      <div class="modal-body">
+        <form action="" class="studentForm addform" method="POST">
+          <input type="hidden" name="id">
+          名称  <input type="text" name="name"><br>
+          学分  <input type="text" name="credit"><br>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary updBtn addbutton">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+<script type="text/javascript">
+	$(function(){
+		$.getJSON('course/findAll',function(data){
+			data.forEach(function(item){
+				var newTr = $('<tr>'
+				+'<td><input type="checkbox" value="'+item.id+'"></td>'
+				+'<td>'+item.name+'</td>'
+				+'<td>'+item.credit+'</td>'
+				+'</tr>');
+				$('tbody').append(newTr);
+			// console.log(newTr);
+			});
+		});
+
+		$('.amendbutton').off();
+		$('.amendbutton').on('click',function(){
+			var id = $('.amendform input[name=id]').val();
+			var name = $('.amendform input[name=name]').val();
+			var credit = $('.amendform input[name=credit]').val();
+			var newCourse = {
+				id:id,
+				name:name,
+				credit:credit
+			};
+			$.ajax('course/update',{
+				'data':newCourse,
+				'method':'POST',
+				'content-Type':'application/json',
+				success:function(data){
+					$('.amendtable').modal('hide');
+					$('.navleft dd').eq(1).trigger('click');
+          			$('.modal-backdrop').css('display','none');
+				}				
+			});
+		});
+		$('.addbutton').off();
+		$('.addbutton').on('click',function(){
+			var id = $('.addform input[name=id]').val();
+			var name = $('.addform input[name=name]').val();
+			var credit = $('.addform input[name=credit]').val();
+			var newCourse = {
+				id:id,
+				name:name,
+				credit:credit
+			};
+			$.ajax('course/save',{
+				'data':newCourse,
+				'method':'POST',
+				'content-Type':'application/json',
+				success:function(data){
+
+					$('.addtable').modal('hide');
+					$('.navleft dd').eq(1).trigger('click');
+          			$('.modal-backdrop').css('display','none');
+				}				
+			});
+		});
+		$('.opts button').eq(0).off();
+		$('.opts button').eq(0).on('click',function(){
+			var ids = $('tbody input:checkbox:checked').toArray().map(function(item){
+				return item.value;
+			});
+			if(ids.length>0){
+				var id = ids[0];
+				$.getJSON('course/findById?id='+id,function(data){
+					// console.log('元素',$('studentForm input[name=id]'));
+					$('.studentForm input[name=id]').val(data[0].id);
+					$('.studentForm input[name=name]').val(data[0].name);
+          			$('.studentForm input[name=credit]').val(data[0].credit);
+          			$('.amendtable').modal('show');
+				});
+			}else{
+				alert("please choose one");
+			}
+		})
+		$('.opts button').eq(1).off();
+		$('.opts button').eq(1).on('click',function(){
+			$('.addtable').modal('show');
+		})
+		$('.opts button').eq(2).off();
+		$('.opts button').eq(2).on('click',function(){
+			var ids = $('tbody input:checkbox:checked').toArray().map(function(item){
+				return item.value;
+			});
+			 if(ids.length!=0){
+		        $.post('course/batchDelete',{
+		        ids:ids
+		        },function(data){
+		          console.log(ids)
+		          $('.navleft dd').eq(1).trigger('click');
+		        })
+		      }else{
+		        alert("please choose");
+		      }
+		})
+
+	});
+
+	 $('tbody').on('click','tr',function(){
+	    var input = $(this).find('input');
+	    // alert($(input).prop('checked'));
+	    if(!$(input).prop('checked')){
+	      $(input).prop('checked',true);
+	    }else{
+	      $(input).prop('checked',false);
+	    }
+	  });
+	  $('tbody').on('click','input',function(event){
+	    event.stopImmediatePropagation();
+	  })
+</script>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Student Management</title>
+	<script type="text/javascript" src="./frameworks/jquery-2.1.4/jquery-2.1.4.min.js"></script>
+	<script type="text/javascript" src="./frameworks/bootstrap-3.3.7/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="./frameworks/bootstrap-3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="css/style.css">
+	<script type="text/javascript">
+    function initStyle(){
+      //获取浏览器视口的高度
+      var height = $(window).height();
+      var ch = height-130;
+      $('.content').css('height',ch+'px');
+      $('.navleft').css('height',ch+'px');
+    }
+    $(function(){
+      //初始化页面
+      initStyle();
+      //为左侧栏绑定事件
+      $('.navleft dd').off();
+      $('.navleft dd').on('click',function(){
+        var page = $(this).attr('page');
+        $('section.content').load(page);
+      });
+      //默认触发
+      $('.navleft dd').eq(0).trigger('click');
+    });
+  </script>
+</head>
+<body>
+  <!--头部-->
+  <header class="header">
+    <h2>学生选课系统</h2>
+    <p>系统正在测试中......</p>
+  </header>
+  <!--体部-->
+  <article class="container">
+    <!--左侧导航-->
+    <section class="navleft">
+      <dl>
+        <dt>选课系统</dt>
+        <dd page="pages/student.html"><a href="javascript:void(0)">学生管理</a></dd>
+        <dd page="pages/course.html"><a href="javascript:void(0)">课程管理</a></dd>
+        <dd page="pages/class.html"><a href="javascript:void(0)">班级管理</a></dd>
+        <dd page="pages/chooseCourse.html"><a href="javascript:void(0)">选课管理</a></dd>
+      </dl>
+    </section>
+    <!--右侧内容-->
+    <section class="content">
+      
+    </section>
+  </article>
+  <!--脚部-->
+  <footer class="footer">
+    <p>copyright:xxx</p>
+    <address>江苏省苏州市昆山市巴城镇学院路828号</address>
+  </footer>
+</body>
+</html>

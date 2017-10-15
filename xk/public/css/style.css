@@ -1,0 +1,26 @@
+h1,h2,h3,h4,ul,dl,p{ margin:0;  }
+header.header {
+  border-bottom: 2px double #ccc;
+  height: 80px;
+}
+
+article.container{
+  overflow: hidden;
+}
+
+section.navleft {
+  float: left;
+  width: 160px;
+  border-right: 1px solid #ccc;
+}
+section.content {
+  margin-left: 165px;
+  padding: 10px;
+  overflow-y: scroll;
+
+}
+
+footer.footer{
+  border-top: 1px solid #ccc;
+  height: 50px;
+}

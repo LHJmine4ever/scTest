@@ -1,0 +1,198 @@
+ <h3>学生管理</h3>
+<hr>
+<table class="table table-bordered">
+  <thead>
+    <tr>
+      <th>编号</th>
+      <th>姓名</th>
+      <th>性别</th>
+      <th>生日</th>
+    </tr>
+  </thead>
+  <tbody>
+    
+  </tbody>
+</table>
+<div class="opts">
+  <button class="btn btn-danger btn-sm">修改</button>
+  <button class="btn btn-danger btn-sm">添加</button>
+  <button class="btn btn-danger btn-sm">删除</button>
+</div>
+
+<div class="modal fade amendtable" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">修改学生信息</h4>
+      </div>
+      <div class="modal-body">
+        <form action="" class="studentForm amendform" method="post">
+          <input type="hidden" name="id">
+          姓名  <input type="text" name="name"><br>
+          性别  <input type="text" name="gender"><br>
+          生日  <input type="text" name="birth"><br>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary updBtn amendbutton">Save changes</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+<div class="modal fade addtable" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">add学生信息</h4>
+      </div>
+      <div class="modal-body">
+        <form action="" class="studentForm addform" method="post">
+          <input type="hidden" name="id">
+          姓名  <input type="text" name="name"><br>
+          性别  <input type="text" name="gender"><br>
+          生日  <input type="text" name="birth"><br>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary updBtn addbutton">Save</button>
+      </div>
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+<script type="text/javascript">
+  $(function(){
+    $.getJSON('student/findAll',function(data){
+      //console.log(data)
+      data.forEach(function(item){
+        var birth = item.birth?item.birth.slice(0,item.birth.indexOf('T')):'';
+
+        var newTr = $('<tr>'
+          +'<td><input type="checkbox" value="'+item.id+'"></td>'
+          +'<td>'+item.name+'</td>'
+          +'<td>'+item.gender+'</td>'
+          +'<td>'+birth+'</td>'
+        +'</tr>');
+        $('tbody').append(newTr);
+      });
+    });
+    //确认修改
+    $('.amendbutton').off();
+    $('.amendbutton').on('click',function(){
+      var id = $('.amendform input[name=id]').val();
+      var name = $('.amendform input[name=name]').val();
+      var gender = $('.amendform input[name=gender]').val();
+      var birth = $('.amendform input[name=birth]').val();
+      //....
+      var newStudent = {
+          id:id,
+          name:name,
+          gender:gender,
+          birth:birth
+        };
+        // alert();
+      // console.log(newStudent)
+      $.ajax('student/update',{
+        'data':newStudent,
+        'method':'POST',
+        'content-Type':'application/json',
+        success:function(data){
+          console.log(data);
+          $('.amendtable').modal('hide');
+          $('.navleft dd').eq(0).trigger('click');
+          $('.modal-backdrop').css('display','none');
+          // console.log($('.modal-backdrop'));
+        }
+      })
+    });
+    $('.addbutton').off();
+    $('.addbutton').on('click',function(){
+      var id = $('.addform input[name=id]').val();
+      var name = $('.addform input[name=name]').val();
+      var gender = $('.addform input[name=gender]').val();
+      var birth = $('.addform input[name=birth]').val();
+      var newStudentman = {
+        id:id,
+        name:name,
+        gender:gender,
+        birth:birth
+      };
+      // console.log(newStudentman);
+      $.ajax('student/save',{
+        'data':newStudentman,
+        'method':'POST',
+        'content-Type':'application/json',
+        success:function(data){
+          $('.addtable').modal('hide');
+          $('.navleft dd').eq(0).trigger('click');
+          $('.modal-backdrop').css('display','none');
+        }
+      })
+    })
+    //为修改按钮绑定事件
+    $('.opts button').eq(0).off();
+    $('.opts button').eq(0).on('click',function(){
+      var ids = $('tbody input:checkbox:checked').toArray().map(function(item){
+        return item.value;
+      });
+      if(ids.length>0){
+        var id = ids[0];
+        $.getJSON('student/findById?id='+id,function(data){
+          // console.log("元素",$('.studentForm input[name=id]'));
+        var birth = data[0].birth?data[0].birth.slice(0,data[0].birth.indexOf('T')):'';
+          $('.studentForm input[name=id]').val(data[0].id);
+          $('.studentForm input[name=name]').val(data[0].name);
+          $('.studentForm input[name=gender]').val(data[0].gender);
+          $('.studentForm input[name=birth]').val(birth);
+          //显示模态框
+          $('.amendtable').modal('show')
+          // $('amendtable').modal({backdrop:'static',keyboard:false});
+        })
+
+      }else {
+        alert("请选中您要修改的信息");
+      }
+
+    });
+    $('.opts button').eq(1).off();
+    $('.opts button').eq(1).on('click',function(){
+      $('.addtable').modal('show');
+    });
+
+    $('.opts button').eq(2).off();
+    $('.opts button').eq(2).on('click',function(){
+      // alert(1);
+      var ids = $('tbody input:checkbox:checked').toArray().map(function(item){
+        return item.value;
+      });
+      if(ids.length!=0){
+        $.post('student/batchDelete',{
+          ids:ids
+        },function(data){
+          console.log(ids)
+          $('.navleft dd').eq(0).trigger('click');
+        })
+      }else{
+        alert("please choose");
+      }
+    })
+
+  })
+  $('tbody').on('click','tr',function(){
+    var input = $(this).find('input');
+    // alert($(input).prop('checked'));
+    if(!$(input).prop('checked')){
+      $(input).prop('checked',true);
+    }else{
+      $(input).prop('checked',false);
+    }
+  });
+  $('tbody').on('click','input',function(event){
+    event.stopImmediatePropagation();
+  })
+</script>
