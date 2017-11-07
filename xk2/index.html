@@ -1,0 +1,152 @@
+<<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>组件库的应用</title>
+  <script src='../js/vue.min.js'></script>
+  <script src='../js/element-ui.js'></script>
+  <script src='../js/jquery-3.0.0.min.js'></script>
+  <link rel="stylesheet" href="../css/element-ui.css">
+</head>
+<body>
+  <div id="app">
+    <h2>{{title}}</h2>
+    <hr>
+    <el-button @click='toSave' type="text">单个录入</el-button>
+    <el-button type="text">批量导入</el-button>
+    <el-table
+      :data="studentData"
+      style="width: 100%">
+      <el-table-column
+        prop="name"
+        label="姓名">
+      </el-table-column>
+      <el-table-column
+        prop="gender"
+        label="性别">
+      </el-table-column>
+      <el-table-column
+        prop="class_id"
+        label="班级编号">
+      </el-table-column>
+      <el-table-column label="操作">
+      <template scope="scope">
+        <el-button
+          size="small"
+          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+        <el-button
+          size="small"
+          type="danger"
+          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+      </template>
+    </el-table-column>
+    </el-table>
+  
+    <el-dialog :title="dialogTitle" :visible.sync="dialogFormVisible">
+      <el-form :model="form">
+        <el-form-item label="姓名">
+          <el-input v-model="form.name" auto-complete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="性别">
+          <el-radio class="radio" v-model="form.gender" label="男">男</el-radio>
+          <el-radio class="radio" v-model="form.gender" label="女">女</el-radio>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="submit">确 定</el-button>
+      </div>
+    </el-dialog>
+  </div>
+
+  <script>
+    new Vue({
+      el:'#app',
+      data:{
+        title:'学生信息管理',
+        dialogTitle:'',
+        dialogFormVisible:false,
+        studentData:null,
+        form:{}
+      },
+      methods:{
+        toSave:function(){
+          this.dialogTitle='录入学生信息';
+          this.dialogFormVisible = true;
+          this.form = { gender:'女' };
+        },
+        submit:function(){
+          var url = 'http://127.0.0.1:3000/student/update'
+          if(this.dialogTitle=='录入学生信息'){
+            url = 'http://127.0.0.1:3000/student/save'
+            this.form.password = '123321';
+            this.form.class_id = 1;
+            this.form.birth = '1990-01-01';
+          }
+          this.form.birth = '1991-01-01';
+          if(!this.form.class_id){
+            this.form.class_id = 1
+          }
+          var vm = this;
+          $.post(url,this.form,function(data){
+            vm.dialogFormVisible = false;
+            if(data.code){
+              vm.$message({
+                  type: 'success',
+                  message: '操作失败，失败代号!'+data.code
+              })
+            }else {
+              //删除成功后更新数据
+              vm.$message({
+                  type: 'success',
+                  message: '操作成功!'
+              });
+            }
+            $.getJSON('http://127.0.0.1:3000/student/findAll',function(data){
+                vm.studentData = data;
+            })
+          });
+        },
+        handleEdit:function(index,row){
+          this.dialogTitle='修改学生信息';
+          this.dialogFormVisible = true;
+          this.form = row;
+        },
+        handleDelete:function(index,row){
+          this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            var vm = this;
+            var url = 'http://127.0.0.1:3000/student/batchDelete';
+            $.post(url,{
+              ids:[row.id]
+            },function(data){
+              //删除成功后更新数据
+              $.getJSON('http://127.0.0.1:3000/student/findAll',function(data){
+                vm.studentData = data;
+                vm.$message({
+                  type: 'success',
+                  message: '删除成功!'
+                });
+              })
+            })
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消删除'
+            });          
+          });
+        }
+      },
+      created:function(){
+        var vm = this;
+        $.getJSON('http://127.0.0.1:3000/student/findAll',function(data){
+          vm.studentData = data;
+        })
+      }
+    });
+  </script>
+</body>
+</html>
